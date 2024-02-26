@@ -7,14 +7,18 @@
 #' @param var Survey variable of interest
 #' @param qname Question name pulled from the TOC
 #' @param sublabel Sublabel pulled from the TOC
+#' @param selector Selector type - if Likert the app will allow for top/bottom box
 #'
 #' @return Data frame with all grouped analysis
 #' @export
 #'
 #' @examples
-svy_summary <- function(tbl, group, var, qname, sublabel) {
+#' \dontrun{
+#' na
+#' }
+svy_summary <- function(tbl, group, var, qname, sublabel, selector) {
 
-  if (is.null(group)) {
+  if (is.na(group)) {
     tbl |>
       dplyr::summarise(proportion = srvyr::survey_mean(vartype = "ci"),
                        n = srvyr::unweighted(dplyr::n())) |>
@@ -25,7 +29,8 @@ svy_summary <- function(tbl, group, var, qname, sublabel) {
       dplyr::select(-!!rlang::sym(var)) |>
       dplyr::relocate(c(var_num, var_label), .before = proportion) |>
       dplyr::mutate(question_text = qname,
-                    sub_label = sublabel) |>
+                    sub_label = sublabel,
+                    selector = selector) |>
       dplyr::filter(!is.na(var_label))
   } else {
     tbl |>
@@ -44,7 +49,8 @@ svy_summary <- function(tbl, group, var, qname, sublabel) {
       dplyr::relocate(c(var_num, var_label), .before = proportion) |>
       dplyr::relocate(group_label, .before = var_num) |>
       dplyr::mutate(question_text = qname,
-                    sub_label = sublabel) |>
+                    sub_label = sublabel,
+                    selector = selector) |>
       dplyr::filter(!is.na(var_label)) |>
       dplyr::filter(!is.na(group_label))
   }
