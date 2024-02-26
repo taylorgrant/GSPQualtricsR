@@ -9,6 +9,9 @@
 #' @export
 #'
 #' @examples
+#' \dontrun{
+#' na
+#' }
 sublabel_clean <- function(tbl, sublabel) {
   if (any(!is.na(tbl$sub_label))) {
     tmp <- tbl |>
