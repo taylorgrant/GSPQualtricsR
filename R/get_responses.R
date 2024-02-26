@@ -9,12 +9,16 @@
 #' @param qname Question name of variable
 #' @param sublabel Any sub-label or extra definition pulled from the API
 #' @param resps Vector of all possible questions respondents could answer
+#' @param selector Selector type - if Likert the app will allow for top/bottom box
 #'
 #' @return Data frame with with all grouped data and the survey proportion
 #' @export
 #'
 #' @examples
-get_responses <- function(data, group, var, qname, sublabel, resps) {
+#'\dontrun{
+#' na
+#' }
+get_responses <- function(data, group, var, qname, sublabel, selector, resps) {
   quo_var <- rlang::sym(var)
 
   tmp <- data$svy |>
@@ -22,18 +26,18 @@ get_responses <- function(data, group, var, qname, sublabel, resps) {
     dplyr::mutate(na_all = (rowSums(dplyr::across(dplyr::matches(resps), is.na))) == length(resps)) |>
     dplyr::filter(na_all == FALSE)
 
-  if (is.null(group)) {
+  if (is.na(group)) {
     # --- Single Variable --- #
     tmp |>
       dplyr::group_by(!!quo_var) |>
-      svy_summary(var, qname, sublabel) |>
+      svy_summary(group, var, qname, sublabel, selector) |>
       sublabel_clean(sublabel)
   } else {
     # --- Grouped Variable --- #
     quo_group <- rlang::sym(group)
     tmp |>
       dplyr::group_by(!!quo_group , !!quo_var) |>
-      svy_summary(group, var, qname, sublabel) |>
+      svy_summary(group, var, qname, sublabel, selector) |>
       sublabel_clean(sublabel)
   }
 }
