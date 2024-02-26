@@ -15,16 +15,16 @@
 #' tb_box(tbl, top, bottom)
 #' }
 tb_box <- function(tbl, top, bottom) {
-  if (grepl("group_label", names(tbl))) {
+  if (any(grepl("group_label", names(tbl)))) {
     tbl |>
       dplyr::mutate(var_label = dplyr::case_when(var_num %in% top ~ glue::glue("Top {length(top)} Box"),
                                           var_num %in% bottom ~ glue::glue("Bottom {length(bottom)} Box"),
                                           TRUE ~ as.character(var_label)),
-                    var_num = dplyr::case_when(var_num %in% top ~ max(var_num),
+                    var_num = dplyr::case_when(var_num %in% top ~ 100,
                                                var_num %in% bottom ~ min(var_num)+1,
                                                TRUE ~ var_num),
                     var_label = forcats::fct_reorder(var_label, var_num)) |>
-      dplyr::group_by(question_text, group_label, sub_label, var_label, variable, ) |>
+      dplyr::group_by(question_text, group_label, sub_label, var_label, var_num) |>
       dplyr::summarise(proportion = sum(proportion),
                 n = sum(n))
   } else {
@@ -32,11 +32,11 @@ tb_box <- function(tbl, top, bottom) {
       dplyr::mutate(var_label = dplyr::case_when(var_num %in% top ~ glue::glue("Top {length(top)} Box"),
                                           var_num %in% bottom ~ glue::glue("Bottom {length(bottom)} Box"),
                                           TRUE ~ as.character(var_label)),
-                    var_num = dplyr::case_when(var_num %in% top ~ max(var_num),
+                    var_num = dplyr::case_when(var_num %in% top ~ 100,
                                                var_num %in% bottom ~ min(var_num)+1,
                                                TRUE ~ var_num),
                     var_label = forcats::fct_reorder(var_label, var_num)) |>
-      dplyr::group_by(question_text, sub_label, var_label, variable, ) |>
+      dplyr::group_by(question_text, sub_label, var_label, var_num ) |>
       dplyr::summarise(proportion = sum(proportion),
                 n = sum(n))
   }
