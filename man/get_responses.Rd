@@ -4,7 +4,7 @@
 \alias{get_responses}
 \title{Get survey responses}
 \usage{
-get_responses(data, group, var, qname, sublabel, resps)
+get_responses(data, group, var, qname, sublabel, selector, resps)
 }
 \arguments{
 \item{data}{Survey data}
@@ -17,6 +17,8 @@ get_responses(data, group, var, qname, sublabel, resps)
 
 \item{sublabel}{Any sub-label or extra definition pulled from the API}
 
+\item{selector}{Selector type - if Likert the app will allow for top/bottom box}
+
 \item{resps}{Vector of all possible questions respondents could answer}
 }
 \value{
@@ -25,4 +27,9 @@ Data frame with with all grouped data and the survey proportion
 \description{
 This is a helper function that is called by the \code{summarize_survey()} function.
 As a result, all parameters are passed into it via the higher order function.
+}
+\examples{
+\dontrun{
+na
+}
 }

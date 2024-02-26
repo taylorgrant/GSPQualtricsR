@@ -4,7 +4,7 @@
 \alias{svy_summary}
 \title{Summarize the survey data}
 \usage{
-svy_summary(tbl, group, var, qname, sublabel)
+svy_summary(tbl, group, var, qname, sublabel, selector)
 }
 \arguments{
 \item{tbl}{Survey data with group and variable of interest}
@@ -16,10 +16,17 @@ svy_summary(tbl, group, var, qname, sublabel)
 \item{qname}{Question name pulled from the TOC}
 
 \item{sublabel}{Sublabel pulled from the TOC}
+
+\item{selector}{Selector type - if Likert the app will allow for top/bottom box}
 }
 \value{
 Data frame with all grouped analysis
 }
 \description{
 This is a helper function for \code{summarize_survey()} and all arguments are passed into this via that higher order function.
+}
+\examples{
+\dontrun{
+na
+}
 }

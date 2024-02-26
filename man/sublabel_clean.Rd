@@ -17,3 +17,8 @@ Data frame but sub labels are either NA or hopefully informative
 \description{
 This is a helper function used in the \code{summarize_survey()} function. It is used to map any sub labels pulled from the question wordings against the variable labels pulled from the SPSS data. In the event that there is a match, variable labels win. If possible, we try to split the sublabels on a " - " and then try to match the split labels against the variable labels again. The goal is to try to get to meaningful sublabels for grouping in tables and graphs.
 }
+\examples{
+\dontrun{
+na
+}
+}
