@@ -16,11 +16,15 @@
 summarize_survey <- function(parameters, data) {
   qinfo <- data$toc |> dplyr::filter(question_id == parameters$qid)
   qvct <- dplyr::pull(qinfo, export_name)
-  if (parameters$gid == "") {
-    gvct <- NULL
+  if (is.null(parameters$gid)) {
+    group <- NA
   } else {
-    ginfo <- data$toc |> dplyr::filter(question_id == parameters$gid)
-    gvct <- dplyr::pull(ginfo, export_name)
+    group <- data$toc |> dplyr::filter(question_id == parameters$gid) |>
+      dplyr::pull(export_name)
   }
-  purrr::pmap_dfr(list(qinfo$export_name, qinfo$question_text, qinfo$sub, group = ginfo$export_name), resps = qvct, get_responses, data = data)
+  crossed <- tidyr::crossing(qinfo, group)
+  purrr::pmap_dfr(list(var = crossed$export_name, qname = crossed$question_text,
+                       sublabel = crossed$sub, selector = crossed$selector_type,
+                       group = crossed$group),
+                  resps = qvct, get_responses, data = data)
 }
