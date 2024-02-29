@@ -135,16 +135,16 @@ fetch_survey_data <- function(sid) {
 
     # Generation and Cohort (this is based on specific Q wording so pretty inflexible)
     cohort_generation <- function(tbl) {
-      if (any(stringr::str_detect(toc$question_text, "How old are you?"))) {
+      if (any(stringr::str_detect(toc$question_text, stringr::fixed("How old are you?")))) {
         v1 <- tbl |>
-          dplyr::filter(stringr::str_detect(question_text, "How old are you?")) |>
+          dplyr::filter(stringr::str_detect(question_text, stringr::fixed("How old are you?"))) |>
           dplyr::mutate(question_id = paste0(question_id, "a"),
                         question_type = "TE_AGE",
                         question_text = "Respondent breakdown by age cohort",
                         export_name = "Cohorts")
 
         v2 <- tbl |>
-          dplyr::filter(stringr::str_detect(question_text, "How old are you?")) |>
+          dplyr::filter(stringr::str_detect(question_text, stringr::fixed("How old are you?"))) |>
           dplyr::mutate(question_id = paste0(question_id, "b"),
                         question_type = "TE_AGE",
                         question_text = "Respondent breakdown by generation",
@@ -163,7 +163,7 @@ fetch_survey_data <- function(sid) {
   # get survey (spss version)
   svy <- fetch_survey(sid)
 
-  if (any(stringr::str_detect(toc$question_text, "How old are you?"))) {
+  if (any(stringr::str_detect(toc$question_text, stringr::fixed("How old are you?")))) {
     age_q <- toc[which(stringr::str_detect(toc$question_text, stringr::fixed("How old are you?"))),]$export_name
 
     if (any(stringr::str_detect(haven::as_factor(svy[[age_q]]), "-"))) {
