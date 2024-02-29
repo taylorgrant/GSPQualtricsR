@@ -18,8 +18,7 @@ sublabel_clean <- function(tbl, sublabel) {
       dplyr::mutate(sub_label = dplyr::case_when(var_label == sublabel ~ NA,
                                                  TRUE ~ sublabel),
                     sub_label = dplyr::case_when(sub_label == "" ~ NA,
-                                                 TRUE ~ sub_label),
-                    sub_label = stringr::str_remove_all(sub_label, "Selected Choice - ")) |>
+                                                 TRUE ~ sub_label)) |>
       tidyr::separate(sub_label, into = c("s1", "s2"), sep = " - ", remove = FALSE) |>
       dplyr::mutate(dplyr::across(s1:s2, ~dplyr::case_when(var_label == . ~ NA,
                                                            TRUE ~ .)))
