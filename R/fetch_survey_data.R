@@ -2,12 +2,12 @@
 #'
 #' @param sid Qualtrics survey ID of a specific survey
 #'
-#' @return Named list - "`svy`" is an unweighted survey design object from `srvyr::as_design()`; "`toc`" is a table of contents containing the following columns: survey block, question order, question name, question id, question type, question text, and sub-labels used, and the question selector type the respondent used.
+#' @return Named list -- "`svy`" is an unweighted survey design object from `srvyr::as_design()`; "`toc`" is a table of contents containing the following columns: survey block, question order, question name, question id, question type, question text, and sub-labels used, and the question selector type the respondent used.
 #'
-#' Question Types
+#' Question Types:
 #' Multiple Choice (MC); Text (TE); Matrix; Slider; Highlighter (HL); HeatMap; Drill Down (DD); Rank Order (RO); Side by Side (SBS or SS)
 #'
-#' Selector Types
+#' Selector Types:
 #' Single Answer (SA or SAVR); Multiple Answer (MA or MAVR); Text Entry (TE); Likert; TB (Text Box)
 #' @export
 #'
@@ -81,23 +81,21 @@ fetch_survey_data <- function(sid) {
   }
 
   # FN - build TOC and Blocklist for app
-  get_survey_data <- function(sid) {
+  build_toc <- function(sid) {
     # survey design (yes)
     d <- qsurvey::design(id = sid)
 
-    # have to get proper q ordering (metadata is wrong sometimes)
+    # have to get proper q ordering (metadata pulled via `qsurvey::design()` is wrong sometimes)
+    # this is inefficient; effectively have to fetch the survey 2x
     meta <- qualtRics::fetch_survey(sid) |>
       qualtRics::extract_colmap() |>
       dplyr::filter(!stringr::str_detect(qname, "_DO_")) |>
       dplyr::filter(stringr::str_detect(qname, "^Q")) |>
       dplyr::select(export_name = qname, sub, question_id = ImportId) |>
       dplyr::mutate(question_id = gsub("\\_.*", "", question_id),
-                    sub = trimws(gsub("[\r\n\t]", " ", sub)))
+                    sub = trimws(gsub("[\r\n\t]", " ", sub)),
+                    sub = stringr::str_remove_all(sub, "Selected Choice - "))
 
-    # helper to strip html tags
-    remove_html <- function(string) {
-      return(gsub("<.*?>", "", string))
-    }
     # survey questions
     svy_q <- qsurvey::questions(design_object = d) |>
       dplyr::mutate(question_text = remove_html(question_text), # strip html tags
@@ -135,18 +133,18 @@ fetch_survey_data <- function(sid) {
       dplyr::filter(!stringr::str_detect(export_name, "_TEXT")) |>
       tidyr::unnest(cols = selector_type)
 
-    # FN - Generation and Cohort (this is based on specific Q wording so pretty inflexible)
+    # Generation and Cohort (this is based on specific Q wording so pretty inflexible)
     cohort_generation <- function(tbl) {
-      if (any(toc$question_text == "How old are you? Please enter your current age below.")) {
+      if (any(stringr::str_detect(toc$question_text, "How old are you?"))) {
         v1 <- tbl |>
-          dplyr::filter(question_text == "How old are you? Please enter your current age below.") |>
+          dplyr::filter(stringr::str_detect(question_text, "How old are you?")) |>
           dplyr::mutate(question_id = paste0(question_id, "a"),
                         question_type = "TE_AGE",
                         question_text = "Respondent breakdown by age cohort",
                         export_name = "Cohorts")
 
         v2 <- tbl |>
-          dplyr::filter(question_text == "How old are you? Please enter your current age below.") |>
+          dplyr::filter(stringr::str_detect(question_text, "How old are you?")) |>
           dplyr::mutate(question_id = paste0(question_id, "b"),
                         question_type = "TE_AGE",
                         question_text = "Respondent breakdown by generation",
@@ -160,13 +158,13 @@ fetch_survey_data <- function(sid) {
   }
 
   # table of contents
-  toc <- get_survey_data(sid)
+  toc <- build_toc(sid)
 
   # get survey (spss version)
   svy <- fetch_survey(sid)
 
-  if (any(toc$question_type == "TE_AGE")) {
-    age_q <- toc[which(toc$question_text == "How old are you? Please enter your current age below."),]$export_name
+  if (any(stringr::str_detect(toc$question_text, "How old are you?"))) {
+    age_q <- toc[which(stringr::str_detect(toc$question_text, stringr::fixed("How old are you?"))),]$export_name
     svy <- svy |>
       add_generation(age_q) |>
       add_cohort(age_q)
