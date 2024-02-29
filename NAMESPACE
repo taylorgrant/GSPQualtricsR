@@ -2,6 +2,7 @@
 
 export(add_cohort)
 export(add_generation)
+export(fetch_sids)
 export(fetch_survey_data)
 export(get_responses)
 export(sublabel_clean)
