@@ -165,9 +165,15 @@ fetch_survey_data <- function(sid) {
 
   if (any(stringr::str_detect(toc$question_text, "How old are you?"))) {
     age_q <- toc[which(stringr::str_detect(toc$question_text, stringr::fixed("How old are you?"))),]$export_name
-    svy <- svy |>
-      add_generation(age_q) |>
-      add_cohort(age_q)
+
+    if (any(stringr::str_detect(haven::as_factor(svy[[age_q]]), "-"))) {
+      toc <- toc |>
+        dplyr::filter(!export_name %in% c("Generations", "Cohorts"))
+    } else {
+      svy <- svy |>
+        add_generation(age_q) |>
+        add_cohort(age_q)
+    }
   }
 
   # convert survey into a survey design
