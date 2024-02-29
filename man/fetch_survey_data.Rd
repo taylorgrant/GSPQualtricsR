@@ -10,12 +10,12 @@ fetch_survey_data(sid)
 \item{sid}{Qualtrics survey ID of a specific survey}
 }
 \value{
-Named list - "\code{svy}" is an unweighted survey design object from \code{srvyr::as_design()}; "\code{toc}" is a table of contents containing the following columns: survey block, question order, question name, question id, question type, question text, and sub-labels used, and the question selector type the respondent used.
+Named list -- "\code{svy}" is an unweighted survey design object from \code{srvyr::as_design()}; "\code{toc}" is a table of contents containing the following columns: survey block, question order, question name, question id, question type, question text, and sub-labels used, and the question selector type the respondent used.
 
-Question Types
+Question Types:
 Multiple Choice (MC); Text (TE); Matrix; Slider; Highlighter (HL); HeatMap; Drill Down (DD); Rank Order (RO); Side by Side (SBS or SS)
 
-Selector Types
+Selector Types:
 Single Answer (SA or SAVR); Multiple Answer (MA or MAVR); Text Entry (TE); Likert; TB (Text Box)
 }
 \description{
