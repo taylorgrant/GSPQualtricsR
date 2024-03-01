@@ -4,9 +4,10 @@
 #'
 #' @param tbl Survey data with group and variable of interest
 #' @param group Grouping variable (if used)
+#' @param gsub Group sublabel if applicable
 #' @param var Survey variable of interest
 #' @param qname Question name pulled from the TOC
-#' @param sublabel Sublabel pulled from the TOC
+#' @param qsub qsub pulled from the TOC
 #' @param selector Selector type - if Likert the app will allow for top/bottom box
 #'
 #' @return Data frame with all grouped analysis
@@ -16,7 +17,7 @@
 #' \dontrun{
 #' na
 #' }
-svy_summary <- function(tbl, group, var, qname, sublabel, selector) {
+svy_summary <- function(tbl, group, gsub, var, qname, qsub, selector) {
 
   if (is.na(group)) {
     tbl |>
@@ -27,11 +28,11 @@ svy_summary <- function(tbl, group, var, qname, sublabel, selector) {
                     var_label = haven::as_factor(var_label),
                     var_num = as.numeric(!!rlang::sym(var))) |>
       dplyr::select(-!!rlang::sym(var)) |>
-      dplyr::relocate(c(var_num, var_label), .before = proportion) |>
       dplyr::mutate(question_text = qname,
-                    sub_label = sublabel,
+                    question_sub = qsub,
                     selector = selector) |>
-      dplyr::filter(!is.na(var_label))
+      dplyr::filter(!is.na(var_label)) |>
+      dplyr::relocate(c(question_text, question_sub, var_num, var_label), .before = proportion)
   } else {
     tbl |>
       dplyr::summarise(proportion = srvyr::survey_mean(vartype = "ci"),
@@ -46,12 +47,12 @@ svy_summary <- function(tbl, group, var, qname, sublabel, selector) {
       dplyr::select(-!!rlang::sym(var)) |>
       dplyr::ungroup() |>
       dplyr::select(-!!rlang::sym(group)) |>
-      dplyr::relocate(c(var_num, var_label), .before = proportion) |>
-      dplyr::relocate(group_label, .before = var_num) |>
       dplyr::mutate(question_text = qname,
-                    sub_label = sublabel,
+                    question_sub = qsub,
+                    group_sub = gsub,
                     selector = selector) |>
       dplyr::filter(!is.na(var_label)) |>
-      dplyr::filter(!is.na(group_label))
+      dplyr::filter(!is.na(group_label)) |>
+      dplyr::relocate(c(question_text, question_sub, group_label, group_sub, var_num, var_label), .before = proportion)
   }
 }
