@@ -5,9 +5,10 @@
 #'
 #' @param data Survey data
 #' @param group Grouping variable if used
+#' @param gsub Group sublabel if applicable
 #' @param var Survey variable of interest
 #' @param qname Question name of variable
-#' @param sublabel Any sub-label or extra definition pulled from the API
+#' @param qsub Any sub-label or extra definition pulled from the API
 #' @param resps Vector of all possible questions respondents could answer
 #' @param selector Selector type - if Likert the app will allow for top/bottom box
 #'
@@ -18,7 +19,7 @@
 #'\dontrun{
 #' na
 #' }
-get_responses <- function(data, group, var, qname, sublabel, selector, resps) {
+get_responses <- function(data, group, gsub, var, qname, qsub, selector, resps) {
   quo_var <- rlang::sym(var)
 
   tmp <- data$svy |>
@@ -30,14 +31,15 @@ get_responses <- function(data, group, var, qname, sublabel, selector, resps) {
     # --- Single Variable --- #
     tmp |>
       dplyr::group_by(!!quo_var) |>
-      svy_summary(group, var, qname, sublabel, selector) |>
-      sublabel_clean(sublabel)
+      svy_summary(group, gsub, var, qname, qsub, selector) |>
+      subquestion_clean(qsub)
   } else {
     # --- Grouped Variable --- #
     quo_group <- rlang::sym(group)
     tmp |>
       dplyr::group_by(!!quo_group , !!quo_var) |>
-      svy_summary(group, var, qname, sublabel, selector) |>
-      sublabel_clean(sublabel)
+      svy_summary(group, gsub, var, qname, qsub, selector) |>
+      subquestion_clean(qsub) |>
+      subgroup_clean(gsub)
   }
 }
