@@ -4,18 +4,20 @@
 \alias{get_responses}
 \title{Get survey responses}
 \usage{
-get_responses(data, group, var, qname, sublabel, selector, resps)
+get_responses(data, group, gsub, var, qname, qsub, selector, resps)
 }
 \arguments{
 \item{data}{Survey data}
 
 \item{group}{Grouping variable if used}
 
+\item{gsub}{Group sublabel if applicable}
+
 \item{var}{Survey variable of interest}
 
 \item{qname}{Question name of variable}
 
-\item{sublabel}{Any sub-label or extra definition pulled from the API}
+\item{qsub}{Any sub-label or extra definition pulled from the API}
 
 \item{selector}{Selector type - if Likert the app will allow for top/bottom box}
 

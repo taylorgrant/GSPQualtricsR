@@ -4,18 +4,20 @@
 \alias{svy_summary}
 \title{Summarize the survey data}
 \usage{
-svy_summary(tbl, group, var, qname, sublabel, selector)
+svy_summary(tbl, group, gsub, var, qname, qsub, selector)
 }
 \arguments{
 \item{tbl}{Survey data with group and variable of interest}
 
 \item{group}{Grouping variable (if used)}
 
+\item{gsub}{Group sublabel if applicable}
+
 \item{var}{Survey variable of interest}
 
 \item{qname}{Question name pulled from the TOC}
 
-\item{sublabel}{Sublabel pulled from the TOC}
+\item{qsub}{qsub pulled from the TOC}
 
 \item{selector}{Selector type - if Likert the app will allow for top/bottom box}
 }
