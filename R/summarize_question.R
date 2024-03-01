@@ -1,0 +1,30 @@
+#' Summarize survey question of interest
+#'
+#' This is the wrapper function that summarizes all survey data
+#'
+#' @param parameters Parameters are a named list with the question ids for the grouping variable and variable of interest. The question ids are used to filter the table of contents to pull all potential columns of interest.
+#' @param data Named list that is returned by the `fetch_survey_data()` function.
+#'
+#' @return Data frame with all proportions and confidence intervals for the variable of interest, split out by grouping variable (if one is selected).
+#' @export
+#'
+#' @examples
+#' \dontrun{
+#' parameters = list(qid = "VARID", gid = "GROUPID")
+#' tbl <- summarize_survey(parameters, data = out)
+#' }
+summarize_question <- function(parameters, data) {
+  qinfo <- data$toc |> dplyr::filter(question_id == parameters$qid)
+  qvct <- dplyr::pull(qinfo, export_name)
+  if (is.null(parameters$gid)) {
+    group = data.frame(group = NA, gsub = NA)
+  } else {
+    group <- data$toc |> dplyr::filter(question_id == parameters$gid) |>
+      dplyr::select(group = export_name, gsub = sub)
+  }
+  crossed <- tidyr::crossing(qinfo, group)
+  purrr::pmap_dfr(list(var = crossed$export_name, qname = crossed$question_text,
+                       qsub = crossed$sub, selector = crossed$selector_type,
+                       group = crossed$group, gsub = crossed$gsub),
+                  resps = qvct, get_responses, data = data)
+}
