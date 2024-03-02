@@ -13,6 +13,6 @@ remove_html <- function(string) {
 }
 
 survey_duration <- function(x){
-  paste0(gsub("\\..*", "", x %% 60),"M", " ", gsub(".*\\.", "", round(x %% 60, 2)), "S")
+  paste0(gsub("\\..*", "", x %% 60),":", gsub(".*\\.", "", round(x %% 60, 2)))
 }
 
