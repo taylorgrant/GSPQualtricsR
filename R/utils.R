@@ -8,7 +8,11 @@ convertMenuItem <- function(mi,tabName) {
   mi
 }
 
-
 remove_html <- function(string) {
   return(gsub("<.*?>", "", string))
 }
+
+survey_duration <- function(x){
+  paste0(gsub("\\..*", "", x %% 60),"M", " ", gsub(".*\\.", "", round(x %% 60, 2)), "S")
+}
+
