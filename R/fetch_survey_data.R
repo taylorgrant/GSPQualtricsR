@@ -132,7 +132,8 @@ fetch_survey_data <- function(sid) {
       dplyr::relocate(block, .before = "question_order") |>
       dplyr::mutate(selector_type = purrr::map(question_id, get_selector)) |>
       dplyr::filter(!stringr::str_detect(export_name, "_TEXT")) |>
-      tidyr::unnest(cols = selector_type)
+      tidyr::unnest(cols = selector_type) |>
+      dplyr::filter(!stringr::str_detect(question_text, stringr::fixed("Welcome to our survey")))
 
     # Generation and Cohort (this is based on specific Q wording so pretty inflexible)
     cohort_generation <- function(tbl) {
