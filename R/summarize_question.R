@@ -11,20 +11,25 @@
 #' @examples
 #' \dontrun{
 #' parameters = list(qid = "VARID", gid = "GROUPID")
-#' tbl <- summarize_survey(parameters, data = out)
+#' tbl <- summarize_survey(parameters, data = SURVEYDATA)
 #' }
 summarize_question <- function(parameters, data) {
   qinfo <- data$toc |> dplyr::filter(question_id == parameters$qid)
   qvct <- dplyr::pull(qinfo, export_name)
   if (is.null(parameters$gid)) {
-    group = data.frame(group = NA, gsub = NA)
+    group <- data.frame(group = NA, gsub = NA)
   } else {
     group <- data$toc |> dplyr::filter(question_id == parameters$gid) |>
       dplyr::select(group = export_name, gsub = sub)
+  }
+  if (is.null(parameters$fiq$filterQ)) {
+    filters <- list(filterQ = NA, filter_choices = NA)
+  } else {
+    filters <- parameters$fiq
   }
   crossed <- tidyr::crossing(qinfo, group)
   purrr::pmap_dfr(list(var = crossed$export_name, qname = crossed$question_text,
                        qsub = crossed$sub, selector = crossed$selector_type,
                        group = crossed$group, gsub = crossed$gsub),
-                  resps = qvct, get_responses, data = data)
+                  resps = qvct, filters = filters, get_responses, data = data)
 }
