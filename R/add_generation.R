@@ -15,6 +15,9 @@
 #' }
 add_generation <- function(data, ageq) {
   quo_var <- rlang::sym(ageq)
+  gen_labels = c("Gen Alpha" = 1, "Gen Z" = 2, "Millennials" = 3,"Gen X" = 4,
+                 "Boomers" = 5, "Silent" = 6, "Greatest" = 7)
+
   if (haven::is.labelled(data[[ageq]])) {
     tmpdat <- data |>
       dplyr::mutate(age = as.numeric(as.character(haven::as_factor(!!quo_var))))
@@ -24,17 +27,17 @@ add_generation <- function(data, ageq) {
   }
   tmpdat |>
     dplyr::mutate(yob = lubridate::year(Sys.Date()) - age) |>
-    dplyr::mutate(Generations = dplyr::case_when(yob < 2013 & yob > 1996 ~ 'Gen Z',
-                                                 yob < 1997 & yob > 1980 ~ 'Millennials',
-                                                 yob < 1981 & yob > 1964 ~ 'Gen X',
-                                                 yob < 1965 & yob > 1945 ~ 'Boomers',
-                                                 yob < 1946 & yob > 1927 ~ 'Silent',
-                                                 yob < 1928 ~ 'Greatest',
-                                                 yob > 2012 ~ 'Post-Z'),
-                  Generations = factor(Generations, levels = c("Gen Z", "Millennials",
-                                                             "Gen X", "Boomers"))) |>
+    dplyr::mutate(Generations = dplyr::case_when(yob < 2013 & yob > 1996 ~ 2,
+                                                 yob < 1997 & yob > 1980 ~ 3,
+                                                 yob < 1981 & yob > 1964 ~ 4,
+                                                 yob < 1965 & yob > 1945 ~ 5,
+                                                 yob < 1946 & yob > 1927 ~ 6,
+                                                 yob < 1928 ~ 7,
+                                                 yob > 2012 ~ 1),
+                  Generations = haven::labelled(Generations, labels = gen_labels)) |>
     dplyr::select(-age)
 }
+
 
 #' Add age cohorts to survey data
 #'
@@ -50,6 +53,8 @@ add_generation <- function(data, ageq) {
 #' }
 add_cohort <- function(data, ageq) {
   quo_var <- rlang::sym(ageq)
+  cohort_labels <- c("18-24" = 1, "25-34" = 2, "35-44" = 3, "45-54" = 4, "55-64" = 5, "65+" = 6)
+
   if (haven::is.labelled(data[[ageq]])) {
     tmpdat <- data |>
       dplyr::mutate(age = as.numeric(as.character(haven::as_factor(!!quo_var))))
@@ -58,13 +63,13 @@ add_cohort <- function(data, ageq) {
       dplyr::mutate(age = !!quo_var)
   }
   tmpdat |>
-    dplyr::mutate(Cohorts = dplyr::case_when(age <= 24 ~ "18-24",
-                                             age > 24 & age <= 34 ~ "25-34",
-                                             age > 34 & age <= 44 ~ "35-44",
-                                             age > 44 & age <= 54 ~ "45-54",
-                                             age > 54 & age <= 64 ~ "55-64",
-                                             age > 64 ~ "65+"),
-                  Cohorts = factor(Cohorts, levels = c("18-24", "25-34", "35-44",
-                                                     "45-54", "55-64", "65+"))) |>
+    dplyr::mutate(Cohorts = dplyr::case_when(age <= 24 ~ 1,
+                                             age > 24 & age <= 34 ~ 2,
+                                             age > 34 & age <= 44 ~ 3,
+                                             age > 44 & age <= 54 ~ 4,
+                                             age > 54 & age <= 64 ~ 5,
+                                             age > 64 ~ 6),
+                  Cohorts = haven::labelled(Cohorts, labels = cohort_labels)) |>
     dplyr::select(-age)
 }
+
