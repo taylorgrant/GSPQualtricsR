@@ -102,7 +102,8 @@ fetch_survey_data <- function(sid) {
                     question_text = gsub("[\r\n\t]", " ", question_text), # strip line breaks
                     question_text = trimws(gsub("\\s+", " ", question_text)),
                     question_text = stringr::str_replace_all(question_text, "&quot;", "'")) |>
-      dplyr::filter(question_type != "DB") |>
+      dplyr::filter(!question_type %in% c("DB", "Timing")) |>
+      dplyr::filter(!stringr::str_detect(question_text, "quality of our data|any final feedback")) |>
       dplyr::as_tibble() |>
       dplyr::distinct(question_order, question_id, question_type, question_text) |>
       dplyr::left_join(meta, by = "question_id") |>
@@ -162,6 +163,13 @@ fetch_survey_data <- function(sid) {
 
   # get survey (spss version)
   svy <- fetch_survey(sid)
+
+  # search for any user generated variables (start with "x") to add to toc
+  if (any(stringr::str_detect(names(svy), "^x"))) {
+    toc <- rbind(toc, user_generated(svy, toc))
+    # once added to the toc, add labels to the variables for use in the app
+    svy <- create_labelled(svy, toc)
+    }
 
   if (any(stringr::str_detect(toc$question_text, stringr::fixed("How old are you?")))) {
     age_q <- toc[which(stringr::str_detect(toc$question_text, stringr::fixed("How old are you?"))),]$export_name
