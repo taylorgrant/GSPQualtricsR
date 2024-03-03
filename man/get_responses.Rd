@@ -4,7 +4,7 @@
 \alias{get_responses}
 \title{Get survey responses}
 \usage{
-get_responses(data, group, gsub, var, qname, qsub, selector, resps)
+get_responses(data, group, gsub, var, qname, qsub, selector, resps, filters)
 }
 \arguments{
 \item{data}{Survey data}
@@ -22,6 +22,8 @@ get_responses(data, group, gsub, var, qname, qsub, selector, resps)
 \item{selector}{Selector type - if Likert the app will allow for top/bottom box}
 
 \item{resps}{Vector of all possible questions respondents could answer}
+
+\item{filters}{List containing any Q columns to filter and the responses to keep}
 }
 \value{
 Data frame with with all grouped data and the survey proportion

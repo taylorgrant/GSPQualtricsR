@@ -20,6 +20,6 @@ This is the wrapper function that summarizes all survey data
 \examples{
 \dontrun{
 parameters = list(qid = "VARID", gid = "GROUPID")
-tbl <- summarize_survey(parameters, data = out)
+tbl <- summarize_survey(parameters, data = SURVEYDATA)
 }
 }
