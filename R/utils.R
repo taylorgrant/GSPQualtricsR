@@ -12,7 +12,7 @@ remove_html <- function(string) {
   return(gsub("<.*?>", "", string))
 }
 
-# check to see if any user generated variables are in the survey
+# check to see if any user generated variables are in the survey (must be prefaced with an "x")
 user_generated <- function(tbl, toc) {
   vars <- colnames(tbl)[grepl("^x", colnames(tbl))]
   qo <- seq(max(toc$question_order)+1, max(toc$question_order)+length(vars), 1)
