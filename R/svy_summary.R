@@ -44,7 +44,8 @@ svy_summary <- function(tbl, group, gsub, var, qname, qsub, selector) {
                     var_label = haven::as_factor(var_label),
                     var_num = as.numeric(!!rlang::sym(var)),
                     group_label = trimws(gsub("[\r\n\t]", "", haven::as_factor(!!rlang::sym(group)))),
-                    group_label = haven::as_factor(group_label)) |>
+                    group_label = haven::as_factor(group_label),
+                    total_n = attr(tbl, "total_n")) |>
       dplyr::select(-!!rlang::sym(var)) |>
       dplyr::ungroup() |>
       dplyr::select(-!!rlang::sym(group)) |>
