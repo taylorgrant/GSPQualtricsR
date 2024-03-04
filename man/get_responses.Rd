@@ -4,7 +4,18 @@
 \alias{get_responses}
 \title{Get survey responses}
 \usage{
-get_responses(data, group, gsub, var, qname, qsub, selector, resps, filters)
+get_responses(
+  data,
+  group,
+  gsub,
+  var,
+  qname,
+  qsub,
+  selector,
+  resps,
+  filters,
+  ci
+)
 }
 \arguments{
 \item{data}{Survey data}
@@ -24,6 +35,8 @@ get_responses(data, group, gsub, var, qname, qsub, selector, resps, filters)
 \item{resps}{Vector of all possible questions respondents could answer}
 
 \item{filters}{List containing any Q columns to filter and the responses to keep}
+
+\item{ci}{Confidence interval used for stat sig testing}
 }
 \value{
 Data frame with with all grouped data and the survey proportion
