@@ -167,7 +167,10 @@ fetch_survey_data <- function(sid) {
 
   # search for any user generated variables (start with "x") to add to toc
   if (any(stringr::str_detect(names(svy), "^x"))) {
-    toc <- rbind(toc, user_generated(svy, toc))
+    toc <- rbind(toc, user_generated(svy, toc)) |>
+      dplyr::group_by(question_order) |>
+      dplyr::mutate(second_order = as.factor(dplyr::row_number())) |>
+      dplyr::relocate(second_order, .after = question_order)
     # once added to the toc, add labels to the variables for use in the app
     svy <- create_labelled(svy, toc)
     }
