@@ -23,18 +23,26 @@
 get_responses <- function(data, group, gsub, var, qname, qsub, selector, resps, filters) {
   quo_var <- rlang::sym(var)
 
+  # if user not using the global filter
   if (is.na(filters$filterQ)) {
     tmp <- data$svy |>
       # can't get logic, but can drop anyone that didn't answer all questions tied to a specific ID
       dplyr::mutate(na_all = (rowSums(dplyr::across(dplyr::matches(resps), is.na))) == length(resps)) |>
       dplyr::filter(na_all == FALSE)
+
+    # respondent count as attr - becomes column in `svy_summary()`
+    attr(tmp, "total_n") <- nrow(tmp)
   } else {
+    # if global filter is used
     quo_filter <- rlang::sym(filters$filterQ)
     tmp <- data$svy |>
       # can't get logic, but can drop anyone that didn't answer all questions tied to a specific ID
       dplyr::mutate(na_all = (rowSums(dplyr::across(dplyr::matches(resps), is.na))) == length(resps)) |>
       dplyr::filter(na_all == FALSE) |>
       dplyr::filter(!!quo_filter %in% filters$filter_choices)
+
+    # respondent count as attr - becomes column in `svy_summary()`
+    attr(tmp, "total_n") <- nrow(tmp)
   }
 
   if (is.na(group)) {
@@ -43,13 +51,21 @@ get_responses <- function(data, group, gsub, var, qname, qsub, selector, resps, 
       dplyr::group_by(!!quo_var) |>
       svy_summary(group, gsub, var, qname, qsub, selector) |>
       subquestion_clean(qsub)
+
   } else {
     # --- Grouped Variable --- #
     quo_group <- rlang::sym(group)
+
+    # getting group counts to add into data for sig.testing
+    group_counts <- tmp$variables |>
+      dplyr::count(!!quo_group, name = "group_n") |>
+      dplyr::mutate(group_label = haven::as_factor(!!quo_group))
+
     tmp |>
       dplyr::group_by(!!quo_group , !!quo_var) |>
       svy_summary(group, gsub, var, qname, qsub, selector) |>
       subquestion_clean(qsub) |>
-      subgroup_clean(gsub)
+      subgroup_clean(gsub) |>
+      dplyr::left_join(group_counts[,2:3])
   }
 }
