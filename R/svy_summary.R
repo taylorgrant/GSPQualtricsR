@@ -26,7 +26,8 @@ svy_summary <- function(tbl, group, gsub, var, qname, qsub, selector) {
       dplyr::mutate(variable = var,
                     var_label = trimws(gsub("[\r\n\t]", "", haven::as_factor(!!rlang::sym(var)))),
                     var_label = haven::as_factor(var_label),
-                    var_num = as.numeric(!!rlang::sym(var))) |>
+                    var_num = as.numeric(!!rlang::sym(var)),
+                    total_n = attr(tbl, "total_n")) |>
       dplyr::select(-!!rlang::sym(var)) |>
       dplyr::mutate(question_text = qname,
                     question_sub = qsub,
