@@ -16,6 +16,7 @@
 summarize_question <- function(parameters, data) {
   qinfo <- data$toc |> dplyr::filter(question_id == parameters$qid)
   qvct <- dplyr::pull(qinfo, export_name)
+  conf_level <- parameters$ci
   if (is.null(parameters$gid)) {
     group <- data.frame(group = NA, gsub = NA)
   } else {
@@ -28,8 +29,10 @@ summarize_question <- function(parameters, data) {
     filters <- parameters$fiq
   }
   crossed <- tidyr::crossing(qinfo, group)
-  purrr::pmap_dfr(list(var = crossed$export_name, qname = crossed$question_text,
+  out <- purrr::pmap_dfr(list(var = crossed$export_name, qname = crossed$question_text,
                        qsub = crossed$sub, selector = crossed$selector_type,
                        group = crossed$group, gsub = crossed$gsub),
-                  resps = qvct, filters = filters, get_responses, data = data)
+                  resps = qvct, filters = filters,
+                  get_responses, data = data)
+  significance_test(out, conf_level)
 }
