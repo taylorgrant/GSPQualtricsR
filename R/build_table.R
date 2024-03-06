@@ -114,7 +114,7 @@ build_table <- function(tbl, ci) {
                                "; ", sig_let, "Significance at ", paste0(ci*100,"%"), " confidence intervals"))
         )) |>
       DT::formatStyle(columns = colnames(tmpout),
-                      fontSize = '90%')
+                      fontSize = '100%')
   }
 
 
