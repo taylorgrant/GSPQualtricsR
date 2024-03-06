@@ -6,6 +6,7 @@
 \usage{
 get_responses(
   data,
+  block,
   group,
   gsub,
   var,
@@ -13,12 +14,13 @@ get_responses(
   qsub,
   selector,
   resps,
-  filters,
-  ci
+  filters
 )
 }
 \arguments{
 \item{data}{Survey data}
+
+\item{block}{Survey block}
 
 \item{group}{Grouping variable if used}
 
@@ -35,8 +37,6 @@ get_responses(
 \item{resps}{Vector of all possible questions respondents could answer}
 
 \item{filters}{List containing any Q columns to filter and the responses to keep}
-
-\item{ci}{Confidence interval used for stat sig testing}
 }
 \value{
 Data frame with with all grouped data and the survey proportion

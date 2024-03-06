@@ -4,10 +4,12 @@
 \alias{svy_summary}
 \title{Summarize the survey data}
 \usage{
-svy_summary(tbl, group, gsub, var, qname, qsub, selector)
+svy_summary(tbl, block, group, gsub, var, qname, qsub, selector)
 }
 \arguments{
 \item{tbl}{Survey data with group and variable of interest}
+
+\item{block}{Survey block section}
 
 \item{group}{Grouping variable (if used)}
 
