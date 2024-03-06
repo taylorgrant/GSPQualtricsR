@@ -3,6 +3,7 @@
 #' This is a helper function for `summarize_survey()` and all arguments are passed into this via that higher order function.
 #'
 #' @param tbl Survey data with group and variable of interest
+#' @param block Survey block section
 #' @param group Grouping variable (if used)
 #' @param gsub Group sublabel if applicable
 #' @param var Survey variable of interest
@@ -17,13 +18,14 @@
 #' \dontrun{
 #' na
 #' }
-svy_summary <- function(tbl, group, gsub, var, qname, qsub, selector) {
+svy_summary <- function(tbl, block, group, gsub, var, qname, qsub, selector) {
 
   if (is.na(group)) {
     tbl |>
       dplyr::summarise(proportion = srvyr::survey_mean(vartype = "ci"),
                        n = srvyr::unweighted(dplyr::n())) |>
-      dplyr::mutate(variable = var,
+      dplyr::mutate(block = block,
+                    variable = var,
                     var_label = trimws(gsub("[\r\n\t]", "", haven::as_factor(!!rlang::sym(var)))),
                     var_label = haven::as_factor(var_label),
                     var_num = as.numeric(!!rlang::sym(var)),
@@ -38,7 +40,8 @@ svy_summary <- function(tbl, group, gsub, var, qname, qsub, selector) {
     tbl |>
       dplyr::summarise(proportion = srvyr::survey_mean(vartype = "ci"),
                        n = srvyr::unweighted(dplyr::n())) |>
-      dplyr::mutate(variable = var,
+      dplyr::mutate(block = block,
+                    variable = var,
                     group_variable = group,
                     var_label = trimws(gsub("[\r\n\t]", "", haven::as_factor(!!rlang::sym(var)))),
                     var_label = haven::as_factor(var_label),
