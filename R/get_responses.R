@@ -4,6 +4,7 @@
 #' As a result, all parameters are passed into it via the higher order function.
 #'
 #' @param data Survey data
+#' @param block Survey block
 #' @param group Grouping variable if used
 #' @param gsub Group sublabel if applicable
 #' @param var Survey variable of interest
@@ -20,7 +21,7 @@
 #'\dontrun{
 #' na
 #' }
-get_responses <- function(data, group, gsub, var, qname, qsub, selector, resps, filters) {
+get_responses <- function(data, block, group, gsub, var, qname, qsub, selector, resps, filters) {
 
   quo_var <- rlang::sym(var)
 
@@ -56,7 +57,7 @@ get_responses <- function(data, group, gsub, var, qname, qsub, selector, resps, 
     # --- Single Variable --- #
     tmp |>
       dplyr::group_by(!!quo_var) |>
-      svy_summary(group, gsub, var, qname, qsub, selector) |>
+      svy_summary(block, group, gsub, var, qname, qsub, selector) |>
       subquestion_clean(qsub)
 
   } else {
@@ -66,11 +67,11 @@ get_responses <- function(data, group, gsub, var, qname, qsub, selector, resps, 
     # getting group counts to add into data for sig.testing
     group_counts <- tmp$variables |>
       dplyr::count(!!quo_group, name = "group_n") |>
-      dplyr::mutate(group_label = haven::as_factor(!!quo_group))
+      dplyr::mutate(group_label = trimws(gsub("[\r\n\t]", "", haven::as_factor(!!quo_group))))
 
     tmp |>
       dplyr::group_by(!!quo_group , !!quo_var) |>
-      svy_summary(group, gsub, var, qname, qsub, selector) |>
+      svy_summary(block, group, gsub, var, qname, qsub, selector) |>
       subquestion_clean(qsub) |>
       subgroup_clean(gsub) |>
       dplyr::left_join(group_counts[,2:3]) # left join (dropping the <dbl+lbl> column)
