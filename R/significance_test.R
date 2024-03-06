@@ -83,7 +83,8 @@ significance_test <- function(tbl, conf_level) {
         ) |>  broom::tidy()
       })) |>
     tidyr::unnest(cols = signif) |>
-    dplyr::mutate(between = as.numeric(grp1) - (min(as.numeric(grp1) - 1)),
+    dplyr::mutate(grp1 = haven::as_factor(grp1),
+                  between = as.numeric(grp1) - (min(as.numeric(grp1) - 1)),
                   between = LETTERS[between]) |>
     dplyr::mutate(between = ifelse(((p.value < (1 - as.numeric(conf_level))) & (estimate2 > estimate1)), between, NA)) |>
     dplyr::filter(!is.na(between)) |>
@@ -94,8 +95,7 @@ significance_test <- function(tbl, conf_level) {
     dplyr::mutate(var_num = dplyr::case_when(length(unique(var_num)) == 1 ~ dplyr::row_number(),
                                              TRUE ~ as.integer(var_label))) |>
     dplyr::left_join(between, by = c("group_label" = "grp2", "group_sub", "question_sub", "var_label")) |>
-    # var_label is a factor, so need to append letters and re-level
-    dplyr::mutate(var_helper = paste0("<br> (", LETTERS[as.factor(group_label)], ")"))
+    dplyr::mutate(var_helper = paste0("<br> (", LETTERS[haven::as_factor(group_label)], ")"))
 
   attr(out_bwn, "type") <- "between"
 
