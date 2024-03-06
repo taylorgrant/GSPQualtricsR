@@ -110,7 +110,7 @@ build_table <- function(tbl, ci) {
         caption = htmltools::tags$caption(
           style = 'caption-side: bottom; text-align: left;',
           htmltools::em(paste0(q,": ", qtext,
-                               "; Total respondents: ", resp_count, "; Group totals: ", group_mapping,
+                               "; Total respondents: ", resp_count, "; Filters: ",  "; Group totals: ", group_mapping,
                                "; ", sig_let, "Significance at ", paste0(ci*100,"%"), " confidence intervals"))
         )) |>
       DT::formatStyle(columns = colnames(tmpout),
