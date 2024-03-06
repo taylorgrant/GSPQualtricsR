@@ -95,7 +95,7 @@ significance_test <- function(tbl, conf_level) {
                                              TRUE ~ as.integer(var_label))) |>
     dplyr::left_join(between, by = c("group_label" = "grp2", "group_sub", "question_sub", "var_label")) |>
     # var_label is a factor, so need to append letters and re-level
-    dplyr::mutate(var_helper = paste0("<br> (", LETTERS[group_label], ")"))
+    dplyr::mutate(var_helper = paste0("<br> (", LETTERS[as.factor(group_label)], ")"))
 
   attr(out_bwn, "type") <- "between"
 
