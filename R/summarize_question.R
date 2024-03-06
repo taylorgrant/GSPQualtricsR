@@ -29,7 +29,7 @@ summarize_question <- function(parameters, data) {
     filters <- parameters$fiq
   }
   crossed <- tidyr::crossing(qinfo, group)
-  out <- purrr::pmap_dfr(list(var = crossed$export_name, qname = crossed$question_text,
+  out <- purrr::pmap_dfr(list(block = crossed$block, var = crossed$export_name, qname = crossed$question_text,
                        qsub = crossed$sub, selector = crossed$selector_type,
                        group = crossed$group, gsub = crossed$gsub),
                   resps = qvct, filters = filters,
