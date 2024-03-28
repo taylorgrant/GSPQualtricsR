@@ -10,7 +10,7 @@
 #'
 #' @examples
 #' \dontrun{
-#' buid_table(tbl$out_bwn, .95)
+#' build_table(tbl$out_bwn, .95)
 #' }
 build_table <- function(tbl, ci) {
 
