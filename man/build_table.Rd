@@ -19,6 +19,6 @@ Table builds depend on analysis type. If single variable, it's a straightforward
 }
 \examples{
 \dontrun{
-buid_table(tbl$out_bwn, .95)
+build_table(tbl$out_bwn, .95)
 }
 }
