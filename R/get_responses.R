@@ -64,10 +64,10 @@ get_responses <- function(data, block, group, gsub, var, qname, qsub, selector, 
     # --- + Grouped Variable --- #
     quo_group <- rlang::sym(group)
 
-    # getting group counts to add into data for sig.testing
+    # getting group counts to add into data for sig.testing; ensure that label is a factor
     group_counts <- tmp$variables |>
       dplyr::count(!!quo_group, name = "group_n") |>
-      dplyr::mutate(group_label = trimws(gsub("[\r\n\t]", "", haven::as_factor(!!quo_group))))
+      dplyr::mutate(group_label = factor(trimws(gsub("[\r\n\t]", "", haven::as_factor(!!quo_group)))))
 
     tmp |>
       dplyr::group_by(!!quo_group , !!quo_var) |>
