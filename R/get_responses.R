@@ -57,7 +57,7 @@ get_responses <- function(data, block, group, gsub, var, qname, qsub, selector, 
     # --- Single Variable --- #
     tmp |>
       dplyr::group_by(!!quo_var) |>
-      svy_summary(block, group, gsub, var, qname, qsub, selector) |>
+      survey_summary(block, group, gsub, var, qname, qsub, selector) |>
       subquestion_clean(qsub)
 
   } else {
@@ -71,7 +71,7 @@ get_responses <- function(data, block, group, gsub, var, qname, qsub, selector, 
 
     tmp |>
       dplyr::group_by(!!quo_group , !!quo_var) |>
-      svy_summary(block, group, gsub, var, qname, qsub, selector) |>
+      survey_summary(block, group, gsub, var, qname, qsub, selector) |>
       subquestion_clean(qsub) |>
       subgroup_clean(gsub) |>
       dplyr::left_join(group_counts[,2:3]) # left join (dropping the <dbl+lbl> column)
