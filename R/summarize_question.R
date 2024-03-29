@@ -33,6 +33,10 @@ summarize_question <- function(parameters, data) {
                        qsub = crossed$sub, selector = crossed$selector_type,
                        group = crossed$group, gsub = crossed$gsub),
                   resps = qvct, filters = filters,
-                  get_responses, data = data)
+                  get_responses, data = data) |>
+    dplyr::mutate(var_num = as.integer(var_label))
+  if (!is.null(parameters$top_box) || !is.null(parameters$bottom_box)) {
+    out <- likert_box(out, top = parameters$top_box, bottom = parameters$bottom_box)
+  }
   significance_test(out, conf_level)
 }
