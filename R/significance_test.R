@@ -128,14 +128,12 @@ significance_test <- function(tbl, conf_level) {
       dplyr::summarise(sig.tmp = paste(tmp, collapse = ", "))
 
     out_win <- tbl |>
-      dplyr::mutate(var_num = dplyr::case_when(length(unique(var_num)) == 1 ~ dplyr::row_number(),
-                                               TRUE ~ as.numeric(var_num) - (min(as.numeric(var_num) - 1)))) |>
+      # dplyr::mutate(var_num = as.integer(var_label)) |>
       dplyr::left_join(tmp, by = c("question_sub","var_label" = "var2")) |>
       # var_label is a factor, so need to append letters and re-level
       dplyr::mutate(var_label = forcats::fct_reorder(paste0(var_label, "<br> (", LETTERS[var_num], ")"), var_num),
                     question_sub = factor(question_sub),
                     var_helper = paste0("<br> (", LETTERS[var_num], ")"))
-      # dplyr::mutate(var_label = forcats::fct_reorder(paste0(var_label, " (", LETTERS[var_num], ")"), var_num)) |> data.frame()
     out <- list(out_win = out_win, out_bwn = NULL)
   }
   out
