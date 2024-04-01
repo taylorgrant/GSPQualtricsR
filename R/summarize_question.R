@@ -25,8 +25,10 @@ summarize_question <- function(parameters, data) {
   }
   if (is.null(parameters$fiq$filterQ)) {
     filters <- list(filterQ = NA, filter_choices = NA)
+    filter_text <- "No filter"
   } else {
     filters <- parameters$fiq
+    filter_text <- paste(names(filter_choices(data$svy$variables, filters$filterQ))[as.numeric(filters$filter_choices)], collapse = ", ")
   }
   crossed <- tidyr::crossing(qinfo, group)
   out <- purrr::pmap_dfr(list(block = crossed$block, var = crossed$export_name, qname = crossed$question_text,
@@ -38,5 +40,10 @@ summarize_question <- function(parameters, data) {
   if (!is.null(parameters$top_box) || !is.null(parameters$bottom_box)) {
     out <- likert_box(out, top = parameters$top_box, bottom = parameters$bottom_box)
   }
-  significance_test(out, conf_level)
+  out <- significance_test(out, conf_level)
+  attr(out$out_win, "filter_text") <- filter_text
+  if (!is.null(out$out_bwn)) {
+    attr(out$out_bwn, "filter_text") <- filter_text
+  }
+  out
 }
