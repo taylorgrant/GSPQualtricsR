@@ -21,7 +21,7 @@
 survey_summary <- function(tbl, block, group, gsub, var, qname, qsub, selector) {
 
   if (is.na(group)) {
-    tbl |>
+    tbl <- tbl |>
       dplyr::summarise(proportion = srvyr::survey_mean(vartype = "ci"),
                        n = srvyr::unweighted(dplyr::n())) |>
       dplyr::mutate(block = block,
@@ -37,7 +37,7 @@ survey_summary <- function(tbl, block, group, gsub, var, qname, qsub, selector) 
       dplyr::filter(!is.na(var_label)) |>
       dplyr::relocate(c(question_text, question_sub, var_num, var_label), .before = proportion)
   } else {
-    tbl |>
+    tbl <- tbl |>
       dplyr::summarise(proportion = srvyr::survey_mean(vartype = "ci"),
                        n = srvyr::unweighted(dplyr::n())) |>
       dplyr::mutate(block = block,
@@ -60,4 +60,5 @@ survey_summary <- function(tbl, block, group, gsub, var, qname, qsub, selector) 
       dplyr::filter(!is.na(group_label)) |>
       dplyr::relocate(c(question_text, question_sub, group_label, group_sub, var_num, var_label), .before = proportion)
   }
+  tbl
 }
