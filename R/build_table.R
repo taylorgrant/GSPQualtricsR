@@ -18,6 +18,7 @@ build_table <- function(tbl, ci) {
   q <- sub("_.*", "", tbl$variable[1])
   qtext <- unique(tbl$question_text)
   resp_count <- unique(tbl$total_n)
+
   if ("group_label" %in% names(tbl)) {
     tmp <- tbl |> dplyr::distinct(group_label, group_n)
     group_mapping <- paste(tmp$group_label, "=", tmp$group_n, collapse = "; ")
@@ -110,7 +111,7 @@ build_table <- function(tbl, ci) {
         caption = htmltools::tags$caption(
           style = 'caption-side: bottom; text-align: left;',
           htmltools::em(paste0(q,": ", qtext,
-                               "; Total respondents: ", resp_count, "; Filters: ",  "; Group totals: ", group_mapping,
+                               "; Total respondents: ", resp_count, "; Filters: ",attr(tbl, "filter_text"), "; Group totals: ", group_mapping,
                                "; ", sig_let, "Significance at ", paste0(ci*100,"%"), " confidence intervals"))
         )) |>
       DT::formatStyle(columns = colnames(tmpout),
