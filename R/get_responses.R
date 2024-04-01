@@ -33,7 +33,7 @@ get_responses <- function(data, block, group, gsub, var, qname, qsub, selector, 
       dplyr::mutate(na_all = (rowSums(dplyr::across(dplyr::matches(resps), is.na))) == length(resps)) |>
       dplyr::filter(na_all == FALSE)
 
-    # respondent count as attr --> becomes column in `svy_summary()`
+    # respondent count as attr --> becomes column in `survey_summary()`
     attr(tmp, "total_n") <- nrow(tmp)
 
   } else {
