@@ -52,6 +52,7 @@ get_responses <- function(data, block, group, gsub, var, qname, qsub, selector, 
 
   }
 
+  # if there is no group/crosstab
   if (is.na(group)) {
 
     # --- Single Variable --- #
@@ -72,6 +73,7 @@ get_responses <- function(data, block, group, gsub, var, qname, qsub, selector, 
     tmp |>
       dplyr::group_by(!!quo_group , !!quo_var) |>
       survey_summary(block, group, gsub, var, qname, qsub, selector) |>
+      tbl_augment() |>
       subquestion_clean(qsub) |>
       subgroup_clean(gsub) |>
       dplyr::left_join(group_counts[,2:3]) # left join (dropping the <dbl+lbl> column)
