@@ -15,9 +15,9 @@
 build_table <- function(tbl, ci) {
 
   # set up for table caption
-  q <- sub("_.*", "", tbl$variable[1])
-  qtext <- unique(tbl$question_text)
-  resp_count <- unique(tbl$total_n)
+  q <- sub("_.*", "", unique(stats::na.omit(tbl$variable))[1])
+  qtext <- unique(stats::na.omit(tbl$question_text))
+  resp_count <- unique(stats::na.omit(tbl$total_n))
 
   if ("group_label" %in% names(tbl)) {
     tmp <- tbl |> dplyr::distinct(group_label, group_n)
@@ -66,7 +66,8 @@ build_table <- function(tbl, ci) {
                                                         paste0(round(proportion*100), "%","<sup>", sig.tmp, "</sup>", "<br> (", n,")"),
                                                       TRUE ~ paste0(round(proportion*100), "%",  "<br> (", n,")"))) |>
           dplyr::select(`Question Group` = question_sub, `Crosstab Group` = group_label, `Crosstab Subgroup` = group_sub, Answer = var_label, Percentage = proportion) |>
-          tidyr::pivot_wider(names_from = `Crosstab Group`, values_from = Percentage)
+          tidyr::pivot_wider(names_from = `Crosstab Group`, values_from = Percentage) |>
+          dplyr::mutate(dplyr::across(dplyr::everything(), ~dplyr::if_else(stringr::str_detect(., "NA%"), NA, .)))
 
         # drop any columns that are all NA (if no sub-label)
         tmpout <- tmpout[, !sapply(tmpout, function(x) all(is.na(x)))]
@@ -81,7 +82,8 @@ build_table <- function(tbl, ci) {
                                                         paste0(round(proportion*100), "%","<sup>", sig.tmp, "</sup>", "<br> (", n,")"),
                                                       TRUE ~ paste0(round(proportion*100), "%",  "<br> (", n,")"))) |>
           dplyr::select(`Question Group` = question_sub, `Crosstab Group` = group_label, `Crosstab Subgroup` = group_sub, Answer = var_label, Percentage = proportion) |>
-          tidyr::pivot_wider(names_from = Answer, values_from = Percentage)
+          tidyr::pivot_wider(names_from = Answer, values_from = Percentage) |>
+          dplyr::mutate(dplyr::across(dplyr::everything(), ~dplyr::if_else(stringr::str_detect(.x, "NA%"), NA_character_, .)))
 
         # drop any columns that are all NA (if no sub-label)
         tmpout <- tmpout[, !sapply(tmpout, function(x) all(is.na(x)))]
