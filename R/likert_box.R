@@ -48,6 +48,7 @@ likert_box <- function(tbl, top, bottom) {
                       block, variable, group_variable, total_n, selector, group_n) |>
       dplyr::summarise(proportion = sum(proportion),
                 n = sum(n)) |>
+      dplyr::group_by(question_text, question_sub, group_label) |>
       dplyr::mutate(var_num = dplyr::row_number()) |>
       dplyr::ungroup()
   } else {
