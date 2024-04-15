@@ -20,7 +20,7 @@ significance_test <- function(tbl, conf_level) {
 
   within <- tidyr::crossing(group_sub = tbl$group_sub, group_label = tbl$group_label, question_sub = tbl$question_sub,
                   var1 = tbl$var_label, var2 = tbl$var_label) |>
-    dplyr::left_join(dplyr::select(tbl, c(group_sub, group_label, question_sub, var_label, n)),
+    dplyr::left_join(dplyr::select(tbl, c(group_sub, group_label, question_sub, var_label, within = var_num, n)),
                        by = c("group_sub", "group_label", "question_sub", "var1" = "var_label")) |>
     dplyr::left_join(dplyr::select(tbl, c(group_sub, group_label, question_sub, var_label, n, group_n)),
                        by = c("group_sub", "group_label", "question_sub", "var2" = "var_label")) |>
@@ -45,11 +45,11 @@ significance_test <- function(tbl, conf_level) {
     dplyr::summarise(sig.tmp = paste(within, collapse = ", "))
 
   out_win <- tbl |>
-    dplyr::mutate(var_num = dplyr::case_when(length(unique(var_num)) == 1 ~ dplyr::row_number(),
-                                             TRUE ~ as.integer(var_label))) |>
+    dplyr::mutate(var_num = dplyr::case_when(length(unique(var_num)) == 1 ~ as.integer(var_label),
+                                             TRUE ~ var_num)) |>
     dplyr::left_join(within, by = c("group_sub", "group_label", "question_sub","var_label" = "var2")) |>
-    # var_label is a factor, so need to append letters and re-level
-    dplyr::mutate(var_helper = paste0("<br> (", LETTERS[var_label], ")"))
+    # var_label is a factor, so need to append letters
+    dplyr::mutate(var_helper = paste0("<br> (", LETTERS[var_num], ")"))
 
   attr(out_win, "type") <- "within"
 
@@ -93,7 +93,7 @@ significance_test <- function(tbl, conf_level) {
 
   out_bwn <- tbl |>
     dplyr::mutate(var_num = dplyr::case_when(length(unique(var_num)) == 1 ~ dplyr::row_number(),
-                                             TRUE ~ as.integer(var_label))) |>
+                                             TRUE ~ var_num)) |>
     dplyr::left_join(between, by = c("group_label" = "grp2", "group_sub", "question_sub", "var_label")) |>
     dplyr::mutate(var_helper = paste0("<br> (", LETTERS[haven::as_factor(group_label)], ")"))
 
@@ -128,9 +128,8 @@ significance_test <- function(tbl, conf_level) {
       dplyr::summarise(sig.tmp = paste(tmp, collapse = ", "))
 
     out_win <- tbl |>
-      # dplyr::mutate(var_num = as.integer(var_label)) |>
       dplyr::left_join(tmp, by = c("question_sub","var_label" = "var2")) |>
-      # var_label is a factor, so need to append letters and re-level
+      # var_label is a factor, so need to append letters
       dplyr::mutate(var_label = forcats::fct_reorder(paste0(var_label, "<br> (", LETTERS[var_num], ")"), var_num),
                     question_sub = factor(question_sub),
                     var_helper = paste0("<br> (", LETTERS[var_num], ")"))
