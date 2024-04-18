@@ -14,6 +14,7 @@
 #' }
 significance_test <- function(tbl, conf_level) {
 
+  # if there is a crosstab
   if (any(grepl("group_variable", names(tbl)))) {
 
 # CROSSTABBED VARIABLE - WITHIN GROUP -------------------------------------
@@ -60,46 +61,57 @@ significance_test <- function(tbl, conf_level) {
     dplyr::distinct(group_label) |>
     dplyr::pull()
 
-  # cross together so we get every pairing
-  between <- tidyr::crossing(group_sub = tbl$group_sub, grp1 = grp1, grp2 = grp1,
-                             question_sub = tbl$question_sub, var_label = tbl$var_label) |>
-    dplyr::distinct(group_sub, grp1, grp2, question_sub, var_label, .keep_all = TRUE) |>
-    dplyr::left_join(dplyr::select(tbl, c(group_sub, group_label, question_sub, var_label, n, group_n)),
-                     by = c("group_sub", "grp1" = "group_label", "question_sub", "var_label")) |>
-    dplyr::left_join(dplyr::select(tbl, c(group_sub, group_label, question_sub, var_label, n, group_n)),
-                     by = c("group_sub", "grp2" = "group_label", "question_sub", "var_label")) |>
-    dplyr::filter(grp1 != grp2) |>
-    tidyr::replace_na(list(n.x = 0, n.y = 0)) |>
-    dplyr::filter(!is.na(group_n.x)) |>
-    dplyr::filter(!is.na(group_n.y))
+  # if a filter has been applied that only keeps one crosstab group, return NULL
+  if (length(grp1) == 1) {
 
-  between <- between |>
-    dplyr::mutate(
-      signif = list(n.x, n.y, group_n.x, group_n.y) |>  purrr::pmap(~ {
-        prop.test(
-          x = c(..1, ..2),
-          n = c(..3, ..4),
-          conf.level = as.numeric(conf_level)
-        ) |>  broom::tidy()
-      })) |>
-    tidyr::unnest(cols = signif) |>
-    dplyr::mutate(grp1 = haven::as_factor(grp1),
-                  between = as.numeric(grp1) - (min(as.numeric(grp1) - 1)),
-                  between = LETTERS[between]) |>
-    dplyr::mutate(between = ifelse(((p.value < (1 - as.numeric(conf_level))) & (estimate2 > estimate1)), between, NA)) |>
-    dplyr::filter(!is.na(between)) |>
-    dplyr::group_by(group_sub, grp2, question_sub, var_label) |>
-    dplyr::summarise(sig.tmp = paste(between, collapse = ", "))
+    out <- list(out_win = out_win, out_bwn = NULL)
 
-  out_bwn <- tbl |>
-    dplyr::mutate(var_num = dplyr::case_when(length(unique(var_num)) == 1 ~ dplyr::row_number(),
-                                             TRUE ~ var_num)) |>
-    dplyr::left_join(between, by = c("group_label" = "grp2", "group_sub", "question_sub", "var_label")) |>
-    dplyr::mutate(var_helper = paste0("<br> (", LETTERS[haven::as_factor(group_label)], ")"))
+  } else {
 
-  attr(out_bwn, "type") <- "between"
+    # cross together so we get every pairing
+    between <- tidyr::crossing(group_sub = tbl$group_sub, grp1 = grp1, grp2 = grp1,
+                               question_sub = tbl$question_sub, var_label = tbl$var_label) |>
+      dplyr::distinct(group_sub, grp1, grp2, question_sub, var_label, .keep_all = TRUE) |>
+      dplyr::left_join(dplyr::select(tbl, c(group_sub, group_label, question_sub, var_label, n, group_n)),
+                       by = c("group_sub", "grp1" = "group_label", "question_sub", "var_label")) |>
+      dplyr::left_join(dplyr::select(tbl, c(group_sub, group_label, question_sub, var_label, n, group_n)),
+                       by = c("group_sub", "grp2" = "group_label", "question_sub", "var_label")) |>
+      dplyr::filter(grp1 != grp2) |>
+      tidyr::replace_na(list(n.x = 0, n.y = 0)) |>
+      dplyr::filter(!is.na(group_n.x)) |>
+      dplyr::filter(!is.na(group_n.y))
 
-  out <- list(out_win = out_win, out_bwn = out_bwn)
+    between <- between |>
+      dplyr::mutate(
+        signif = list(n.x, n.y, group_n.x, group_n.y) |>  purrr::pmap(~ {
+          prop.test(
+            x = c(..1, ..2),
+            n = c(..3, ..4),
+            conf.level = as.numeric(conf_level)
+          ) |>  broom::tidy()
+        })) |>
+      tidyr::unnest(cols = signif) |>
+      dplyr::mutate(grp1 = haven::as_factor(grp1),
+                    between = as.numeric(grp1) - (min(as.numeric(grp1) - 1)),
+                    between = LETTERS[between]) |>
+      dplyr::mutate(between = ifelse(((p.value < (1 - as.numeric(conf_level))) & (estimate2 > estimate1)), between, NA)) |>
+      dplyr::filter(!is.na(between)) |>
+      dplyr::group_by(group_sub, grp2, question_sub, var_label) |>
+      dplyr::summarise(sig.tmp = paste(between, collapse = ", "))
+
+    out_bwn <- tbl |>
+      dplyr::mutate(var_num = dplyr::case_when(length(unique(var_num)) == 1 ~ dplyr::row_number(),
+                                               TRUE ~ var_num)) |>
+      dplyr::left_join(between, by = c("group_label" = "grp2", "group_sub", "question_sub", "var_label")) |>
+      dplyr::mutate(var_helper = paste0("<br> (", LETTERS[haven::as_factor(group_label)], ")"))
+
+    attr(out_bwn, "type") <- "between"
+
+    out <- list(out_win = out_win, out_bwn = out_bwn)
+
+  }
+
+
   } else {
 
     # SINGLE VARIABLE ---------------------------------------------------------
