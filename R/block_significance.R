@@ -1,3 +1,18 @@
+#' Significance testing for all questions in a block
+#'
+#' Runs a prop.test for each question; both within/between groups
+#'
+#' @param tbl Dataframe of summarized survey data
+#' @param conf_level The ci to test signficance at
+#' @param filter_text Filter text that is passed as an attribute for eventual table export
+#'
+#' @return List of dataframes for each question; one for within group testing and one for between group testing
+#' @export
+#'
+#' @examples
+#' \dontrun{
+#' out <- block_significance(tbl, conf_level, filter_text)
+#' }
 block_significance <- function(tbl, conf_level, filter_text) {
 
   if (any(grepl("group_variable", names(tbl)))) {
