@@ -43,14 +43,20 @@ summarize_block <- function(block_choice, parameters, data) {
                             group = crossed$group, gsub = crossed$gsub),
                        resps = qvct, filters = filters,
                        get_responses, data = data)
-    out <- block_significance(out, conf_level, filter_text)
+    attr(out, "filter_text") <- filter_text
+    out <- block_significance(out, conf_level)
     out
   }
-  block_qids |> purrr::map(get_qinfo) |>
-    purrr::set_names(nm = "block_out")
+  block_qids |> purrr::map(get_qinfo)
+
 }
 
-# tbl <- summarize_block("SuperBowl", parameters)
+# tbl <- summarize_block("SuperBowl", parameters, data)
+
+
+# need to remove a level of lists from a list of lists
+# tbl <- unlist(tbl,recursive=FALSE)
+
 # write to file
-# openxlsx::write.xlsx(tbl$block_out, "~/Desktop/testexcel.xlsx")
+# openxlsx::write.xlsx(tbl, "~/Desktop/testexcel.xlsx")
 
