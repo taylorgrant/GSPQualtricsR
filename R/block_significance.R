@@ -4,7 +4,6 @@
 #'
 #' @param tbl Dataframe of summarized survey data
 #' @param conf_level The ci to test signficance at
-#' @param filter_text Filter text that is passed as an attribute for eventual table export
 #'
 #' @return List of dataframes for each question; one for within group testing and one for between group testing
 #' @export
@@ -13,8 +12,24 @@
 #' \dontrun{
 #' out <- block_significance(tbl, conf_level, filter_text)
 #' }
-block_significance <- function(tbl, conf_level, filter_text) {
+block_significance <- function(tbl, conf_level) {
 
+
+  # GET PARAMETERS FOR CAPTION LABEL ----------------------------------------
+  q <- sub("_.*", "", unique(stats::na.omit(tbl$variable))[1])
+  qtext <- unique(stats::na.omit(tbl$question_text))
+  resp_count <- unique(stats::na.omit(tbl$total_n))
+  filter_text <- attributes(tbl)$filter_text
+  if ("group_variable" %in% names(tbl)) {
+    tmp <- tbl |> dplyr::distinct(group_label, group_n)
+    group_mapping <- paste(tmp$group_label, "=", tmp$group_n, collapse = "; ")
+  } else {
+    group_mapping <- NULL
+  }
+  sig_let <- paste0("(",paste(LETTERS[1:length(unique(tbl$var_helper))], collapse = ", "), "): ")
+  strfun <- function(str, n) {gsub(paste0("([^ ]+( +[^ ]+){",n-1,"}) +"), "\\1\n", str)}   # add line breaks after N spaces
+
+  # significance test starts here
   if (any(grepl("group_variable", names(tbl)))) {
 
     # CROSSTABBED VARIABLE - WITHIN GROUP -------------------------------------
@@ -28,6 +43,7 @@ block_significance <- function(tbl, conf_level, filter_text) {
       dplyr::filter(!is.na(group_n)) |>
       tidyr::replace_na(list(n.x = 0, n.y = 0))
 
+    # run the prop.test
     within <- within |>
       dplyr::mutate(
         signif = list(n.x, n.y, group_n) |>  purrr::pmap(~ {
@@ -46,14 +62,30 @@ block_significance <- function(tbl, conf_level, filter_text) {
       dplyr::summarise(sig.tmp = paste(within, collapse = ", "))
 
     out_win <- tbl |>
-      dplyr::mutate(var_num = dplyr::case_when(length(unique(var_num)) == 1 ~ dplyr::row_number(),
-                                               TRUE ~ var_num)) |>
+      dplyr::mutate(var_num = dplyr::case_when(length(unique(var_num)) == 1 ~ as.integer(var_label),
+                                                        TRUE ~ var_num)) |>
       dplyr::left_join(within, by = c("group_sub", "group_label", "question_sub","var_label" = "var2")) |>
-      # var_label is a factor, so need to append letters and re-level
-      dplyr::mutate(var_helper = paste0("<br> (", LETTERS[var_num], ")"))
+      # var_label is a factor, so need to append letters
+      dplyr::mutate(var_helper = paste0("\n(", LETTERS[var_num], ")"))
 
-    attr(out_win, "type") <- "within"
-    attr(out_win, "filter_text") <- filter_text
+    # need to get the letters available for the caption
+    sig_let <- paste0("(",paste(LETTERS[1:length(unique(out_win$var_helper))], collapse = ", "), "): ")
+
+    out_win <- out_win |>
+      dplyr::mutate(var_label = paste0(var_label, var_helper),
+                    question_sub = strfun(question_sub, 3),
+                    # group_label = strfun(group_label, 3),
+                    proportion = dplyr::case_when(!is.na(sig.tmp) ~ paste0(round(proportion*100), "% ", sig.tmp, "\n(", n,")"),
+                                                  TRUE ~ paste0(round(proportion*100), "%",  "\n(", n,")"))) |>
+      dplyr::select(`Question Group` = question_sub, `Crosstab Group` = group_label, `Crosstab Subgroup` = group_sub, Answer = var_label, Percentage = proportion) |>
+      tidyr::pivot_wider(names_from = Answer, values_from = Percentage) |>
+      dplyr::mutate(dplyr::across(dplyr::everything(), ~dplyr::if_else(stringr::str_detect(., "NA%"), NA, .))) |>
+      dplyr::mutate(caption = paste0(q,": ", qtext,
+                                     "; Total respondents: ", resp_count, "; Filters: ",attr(tbl, "filter_text"), "; Group totals: ", group_mapping,
+                                     "; ", sig_let, "Significance at ", paste0(conf_level*100,"%"), " confidence intervals"))
+    # drop any column that is all NA
+    out_win <- out_win[, !sapply(out_win, function(x) all(is.na(x)))]
+    out_win$caption[-1] <- NA
 
     # CROSSTABBED VARIABLE - BETWEEN GROUPS -----------------------------------
 
@@ -66,8 +98,8 @@ block_significance <- function(tbl, conf_level, filter_text) {
     if (length(grp1) == 1) {
 
       out <- list(out_win = out_win, out_bwn = NULL) |>
-        purrr::set_names(nm = c(paste0(sub("_.*", "", unique(stats::na.omit(out_win$variable))[1]), "_win"),
-                                paste0(sub("_.*", "", unique(stats::na.omit(out_win$variable))[1]), "_bwn")))
+        purrr::set_names(nm = c(paste0(q, "_win"),
+                                paste0(q, "_bwn")))
 
     } else {
 
@@ -106,14 +138,31 @@ block_significance <- function(tbl, conf_level, filter_text) {
         dplyr::mutate(var_num = dplyr::case_when(length(unique(var_num)) == 1 ~ dplyr::row_number(),
                                                  TRUE ~ var_num)) |>
         dplyr::left_join(between, by = c("group_label" = "grp2", "group_sub", "question_sub", "var_label")) |>
-        dplyr::mutate(var_helper = paste0("<br> (", LETTERS[haven::as_factor(group_label)], ")"))
+        dplyr::mutate(var_helper = paste0("\n (", LETTERS[haven::as_factor(group_label)], ")"))
 
-      attr(out_bwn, "type") <- "between"
-      attr(out_bwn, "filter_text") <- filter_text
+      # need to get the letters available for the caption
+      sig_let <- paste0("(",paste(LETTERS[1:length(unique(out_bwn$var_helper))], collapse = ", "), "): ")
+
+      out_bwn <- out_bwn |>
+        dplyr::mutate(group_label = paste0(group_label, var_helper),
+                      question_sub = strfun(question_sub, 3),
+                      var_label = strfun(var_label, 3),
+                      proportion = dplyr::case_when(!is.na(sig.tmp) ~ paste0(round(proportion*100), "% ", sig.tmp, "\n(", n,")"),
+                                                    TRUE ~ paste0(round(proportion*100), "%",  "\n(", n,")"))) |>
+        dplyr::select(`Question Group` = question_sub, `Crosstab Group` = group_label, `Crosstab Subgroup` = group_sub, Answer = var_label, Percentage = proportion) |>
+        tidyr::pivot_wider(names_from = `Crosstab Group`, values_from = Percentage) |>
+        dplyr::mutate(dplyr::across(dplyr::everything(), ~dplyr::if_else(stringr::str_detect(., "NA%"), NA, .))) |>
+        dplyr::mutate(caption = paste0(q,": ", qtext,
+                                       "; Total respondents: ", resp_count, "; Filters: ",attr(tbl, "filter_text"), "; Group totals: ", group_mapping,
+                                       "; ", sig_let, "Significance at ", paste0(conf_level*100,"%"), " confidence intervals"))
+
+      # drop any column that is all NA
+      out_bwn <- out_bwn[, !sapply(out_bwn, function(x) all(is.na(x)))]
+      out_bwn$caption[-1] <- NA
 
       out <- list(out_win, out_bwn) |>
-        purrr::set_names(nm = c(paste0(sub("_.*", "", unique(stats::na.omit(out_win$variable))[1]), "_win"),
-                                paste0(sub("_.*", "", unique(stats::na.omit(out_bwn$variable))[1]), "_bwn")))
+        purrr::set_names(nm = c(paste0(q, "_win"),
+                                paste0(q, "_bwn")))
     }
 
   } else {
@@ -144,14 +193,31 @@ block_significance <- function(tbl, conf_level, filter_text) {
       dplyr::summarise(sig.tmp = paste(tmp, collapse = ", "))
 
     out_win <- tbl |>
+      dplyr::mutate(var_num = dplyr::row_number()) |>
       dplyr::left_join(tmp, by = c("question_sub","var_label" = "var2")) |>
       # var_label is a factor, so need to append letters and re-level
-      dplyr::mutate(var_label = forcats::fct_reorder(paste0(var_label, "<br> (", LETTERS[var_num], ")"), var_num),
+      dplyr::mutate(var_label = forcats::fct_reorder(paste0(var_label, "\n(", LETTERS[var_num], ")"), var_num),
                     question_sub = factor(question_sub),
-                    var_helper = paste0("<br> (", LETTERS[var_num], ")"))
+                    var_helper = paste0("\n(", LETTERS[var_num], ")"))
 
-    attr(out_win, "filter_text") <- filter_text
-    out <- list(out_win = out_win, out_bwn = NULL)
+    # need to get the letters available for the caption
+    sig_let <- paste0("(",paste(LETTERS[1:length(unique(out_win$var_helper))], collapse = ", "), "): ")
+
+    out_win <- out_win |>
+      dplyr::mutate(proportion = dplyr::case_when(!is.na(sig.tmp) ~
+                                                    paste0(round(proportion*100), "% ", sig.tmp, "\n(", n,")"),
+                                                  TRUE ~ paste0(round(proportion*100), "%",  "\n(", n,")"))) |>
+      dplyr::select(`Question Group` = question_sub, Answer = var_label, Percentage = proportion) |>
+      dplyr::mutate(dplyr::across(dplyr::everything(), ~dplyr::if_else(stringr::str_detect(., "NA%"), NA, .))) |>
+      dplyr::mutate(caption = paste0(q,": ", qtext,
+                                     "; Total respondents: ", resp_count, "; Filters: ",attr(tbl, "filter_text"),
+                                     "; ", sig_let, "Significance at ", paste0(conf_level*100,"%"), " confidence intervals"))
+    # drop any column that is all NA
+    out_win <- out_win[, !sapply(out_win, function(x) all(is.na(x)))]
+    out_win$caption[-1] <- NA
+
+    out <- list(out_win = out_win) |>
+      purrr::set_names(nm = q)
   }
   out
 }
