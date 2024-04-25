@@ -4,14 +4,12 @@
 \alias{block_significance}
 \title{Significance testing for all questions in a block}
 \usage{
-block_significance(tbl, conf_level, filter_text)
+block_significance(tbl, conf_level)
 }
 \arguments{
 \item{tbl}{Dataframe of summarized survey data}
 
 \item{conf_level}{The ci to test signficance at}
-
-\item{filter_text}{Filter text that is passed as an attribute for eventual table export}
 }
 \value{
 List of dataframes for each question; one for within group testing and one for between group testing
