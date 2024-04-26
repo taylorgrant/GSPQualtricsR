@@ -37,8 +37,7 @@ build_table <- function(tbl, ci) {
 
     if (any(tbl$selector == "Likert")) { # no sublabel but likert scaling
       tmpout <- tbl |>
-        dplyr::mutate(proportion = dplyr::case_when(!is.na(sig.tmp) ~
-                                                      paste0(round(proportion*100), "%","<sup>", sig.tmp, "</sup>", "<br> (", n,")"),
+        dplyr::mutate(proportion = dplyr::case_when(!is.na(sig.tmp) ~ paste0(round(proportion*100), "%","<sup>", sig.tmp, "</sup>", "<br> (", n,")"),
                                                     TRUE ~ paste0(round(proportion*100), "%",  "<br> (", n,")")),
                       var_label = strfun(var_label, 3)) |>
         dplyr::select(`Question Group` = question_sub, Answer = var_label, Percentage = proportion) |>
@@ -47,8 +46,7 @@ build_table <- function(tbl, ci) {
     } else {
 
       tmpout <- tbl |>
-        dplyr::mutate(proportion = dplyr::case_when(!is.na(sig.tmp) ~
-                                                      paste0(round(proportion*100), "%","<sup>", sig.tmp, "</sup>", "<br> (", n,")"),
+        dplyr::mutate(proportion = dplyr::case_when(!is.na(sig.tmp) ~ paste0(round(proportion*100), "%","<sup>", sig.tmp, "</sup>", "<br> (", n,")"),
                                                     TRUE ~ paste0(round(proportion*100), "%",  "<br> (", n,")"))) |>
         dplyr::select(`Question Group` = question_sub, Answer = var_label, Percentage = proportion)
 
@@ -62,8 +60,7 @@ build_table <- function(tbl, ci) {
           dplyr::mutate(group_label = paste0(group_label, var_helper),
                         question_sub = strfun(question_sub, 3),
                         var_label = strfun(var_label, 3),
-                        proportion = dplyr::case_when(!is.na(sig.tmp) ~
-                                                        paste0(round(proportion*100), "%","<sup>", sig.tmp, "</sup>", "<br> (", n,")"),
+                        proportion = dplyr::case_when(!is.na(sig.tmp) ~ paste0(round(proportion*100), "%","<sup>", sig.tmp, "</sup>", "<br> (", n,")"),
                                                       TRUE ~ paste0(round(proportion*100), "%",  "<br> (", n,")"))) |>
           dplyr::select(`Question Group` = question_sub, `Crosstab Group` = group_label, `Crosstab Subgroup` = group_sub, Answer = var_label, Percentage = proportion) |>
           tidyr::pivot_wider(names_from = `Crosstab Group`, values_from = Percentage) |>
@@ -78,11 +75,10 @@ build_table <- function(tbl, ci) {
           dplyr::mutate(var_label = paste0(var_label, var_helper),
                         question_sub = strfun(question_sub, 3),
                         var_label = strfun(var_label, 3),
-                        proportion = dplyr::case_when(!is.na(sig.tmp) ~
-                                                        paste0(round(proportion*100), "%","<sup>", sig.tmp, "</sup>", "<br> (", n,")"),
+                        proportion = dplyr::case_when(!is.na(sig.tmp) ~ paste0(round(proportion*100), "%","<sup>", sig.tmp, "</sup>", "<br> (", n,")"),
                                                       TRUE ~ paste0(round(proportion*100), "%",  "<br> (", n,")"))) |>
           dplyr::select(`Question Group` = question_sub, `Crosstab Group` = group_label, `Crosstab Subgroup` = group_sub, Answer = var_label, Percentage = proportion) |>
-          tidyr::pivot_wider(names_from = Answer, values_from = Percentage) |>
+          tidyr::pivot_wider(names_from = Answer, values_from = Percentage, names_repair = "minimal") |>
           dplyr::mutate(dplyr::across(dplyr::everything(), ~dplyr::if_else(stringr::str_detect(.x, "NA%"), NA_character_, .)))
 
         # drop any columns that are all NA (if no sub-label)
