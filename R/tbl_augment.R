@@ -11,8 +11,7 @@
 #' tbl_augment(tbl)
 #' }
 tbl_augment <- function(tbl) {
-  var_fill <- data.frame(var_label = tbl$var_label, var_num = tbl$var_num) |>
-    dplyr::distinct()
+  var_fill <- data.frame(var_label = unique(tbl$var_label), var_num = unique(tbl$var_num))
 
   tbl |>
     dplyr::group_by(question_text, question_sub, group_label, group_sub) |>
@@ -20,6 +19,6 @@ tbl_augment <- function(tbl) {
     dplyr::select(-var_num) |>
     dplyr::left_join(var_fill, by = c("var_label")) |>
     dplyr::arrange(var_num, .by_group = TRUE) |>
-    dplyr::mutate(var_num = dplyr::row_number()) |>
+    # dplyr::mutate(var_num = dplyr::row_number()) |>
     dplyr::ungroup()
 }
