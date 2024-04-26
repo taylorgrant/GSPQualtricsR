@@ -36,6 +36,7 @@ survey_summary <- function(tbl, block, group, gsub, var, qname, qsub, selector) 
                     selector = selector) |>
       dplyr::filter(!is.na(var_label)) |>
       dplyr::relocate(c(question_text, question_sub, var_label), .before = proportion)
+
   } else {
     tbl <- tbl |>
       dplyr::summarise(proportion = srvyr::survey_mean(vartype = "ci", na.rm = FALSE),
