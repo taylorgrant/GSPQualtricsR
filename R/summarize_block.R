@@ -23,7 +23,7 @@ summarize_block <- function(block_choice, parameters, data) {
     parameters[[qid]] <- qid
     qinfo <- blockinfo |> dplyr::filter(question_id == qid)
     qvct <- dplyr::pull(qinfo, export_name)
-    conf_level <- parameters$ci
+    conf_level <- as.numeric(parameters$ci)
     if (is.null(parameters$gid)) {
       group <- data.frame(group = NA, gsub = NA)
     } else {
@@ -43,9 +43,21 @@ summarize_block <- function(block_choice, parameters, data) {
                             group = crossed$group, gsub = crossed$gsub),
                        resps = qvct, filters = filters,
                        get_responses, data = data)
+    # clean up the var_num
+    if ("group_label" %in% names(out)) {
+      out <- out |>
+        dplyr::group_by(question_sub, group_label, group_sub) |>
+        dplyr::mutate(var_num = dplyr::row_number()) |>
+        dplyr::ungroup()
+    } else {
+      out <- out |>
+        dplyr::group_by(question_sub) |>
+        dplyr::mutate(var_num = dplyr::row_number()) |>
+        dplyr::ungroup()
+    }
     attr(out, "filter_text") <- filter_text
-    out <- block_significance(out, conf_level)
     out
+    out <- block_significance(out, conf_level)
   }
   block_qids |> purrr::map(get_qinfo)
 
