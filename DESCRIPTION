@@ -22,6 +22,7 @@ Imports:
     htmltools,
     httr,
     lubridate,
+    openxlsx,
     purrr,
     qsurvey,
     qualtRics,
