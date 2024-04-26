@@ -36,6 +36,19 @@ summarize_question <- function(parameters, data) {
                        group = crossed$group, gsub = crossed$gsub),
                   resps = qvct, filters = filters,
                   get_responses, data = data)
+  # clean up the var_num
+  if ("group_label" %in% names(out)) {
+    out <- out |>
+      dplyr::group_by(question_sub, group_label, group_sub) |>
+      dplyr::mutate(var_num = dplyr::row_number()) |>
+      dplyr::ungroup()
+  } else {
+    out <- out |>
+      dplyr::group_by(question_sub) |>
+      dplyr::mutate(var_num = dplyr::row_number()) |>
+      dplyr::ungroup()
+  }
+  # out <- tbl_augment(out)
   if (!is.null(parameters$top_box) || !is.null(parameters$bottom_box)) {
     out <- likert_box(out, top = parameters$top_box, bottom = parameters$bottom_box)
   }
