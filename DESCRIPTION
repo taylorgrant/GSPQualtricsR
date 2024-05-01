@@ -29,5 +29,6 @@ Imports:
     rlang,
     srvyr,
     stringr,
+    tibble,
     tidyr,
     withr

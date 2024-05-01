@@ -46,9 +46,9 @@ user_generated <- function(tbl, toc) {
   vars <- colnames(tbl)[grepl("^x", colnames(tbl))]
   qo <- seq(max(toc$question_order)+1, max(toc$question_order)+length(vars), 1)
   qid <- paste0("QIDx", sample(1000:9999, length(vars)))
-  v1 <- data.frame(block = "User Generated", question_order = qo, export_name = vars,
+  v1 <- tibble::tibble(block = "User Generated", question_order = qo, export_name = vars,
                    question_id = qid, question_type = "User Generated",
-                   question_text = vars, sub = character(0), selector_type = character(0))
+                   question_text = vars, sub = "", selector_type = "")
 }
 
 
