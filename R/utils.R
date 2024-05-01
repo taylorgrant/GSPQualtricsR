@@ -1,4 +1,11 @@
-## function to convert from one shiny tab to another ##
+#' Convert one menu item to another in shiny
+#'
+#' @param mi blah
+#' @param tabName blah
+#'
+#' @return blah
+#' @keywords internal
+#' @export
 convertMenuItem <- function(mi,tabName) {
   mi$children[[1]]$attribs['data-toggle']="tab"
   mi$children[[1]]$attribs['data-value'] = tabName
@@ -8,11 +15,33 @@ convertMenuItem <- function(mi,tabName) {
   mi
 }
 
+#' Helper function - remove html
+#'
+#' @param string blah
+#'
+#' @return string
+#' @keywords internal
+#' @export
 remove_html <- function(string) {
   return(gsub("<.*?>", "", string))
 }
 
-# check to see if any user generated variables are in the survey (must be prefaced with an "x")
+
+#' Check to see if user generated variables are available in the survey
+#'
+#' These variables must begin with an "x"
+#' On survey load, the function find the user generated variables and adds them to the TOC
+#'
+#' @param tbl Survey
+#' @param toc Table of contents
+#'
+#' @return Updated table of contents
+#' @export
+#'
+#' @examples
+#' \dontrun{
+#' user_generated(tbl, toc)
+#' }
 user_generated <- function(tbl, toc) {
   vars <- colnames(tbl)[grepl("^x", colnames(tbl))]
   qo <- seq(max(toc$question_order)+1, max(toc$question_order)+length(vars), 1)
@@ -22,7 +51,19 @@ user_generated <- function(tbl, toc) {
                    question_text = vars, sub = NA, selector_type = NA)
 }
 
-# convert user generated variables into labelled data
+
+#' Convert user generated variables into labelled data (`haven` labelled spss data)
+#'
+#' @param tbl Survey
+#' @param toc TOC
+#'
+#' @return Survey data frame with labelled user generated vars
+#' @export
+#'
+#' @examples
+#' \dontrun{
+#' create_labelled(tbl, toc)
+#' }
 create_labelled <- function(tbl, toc) {
   ugc <- toc[toc$block == "User Generated", ]$export_name
 
@@ -41,12 +82,26 @@ create_labelled <- function(tbl, toc) {
 }
 
 
-# calculate mean duration across respondents
+#' Calculate mean survey duration across respondents
+#'
+#' @param x blah
+#'
+#' @return time variable
+#' @keywords internal
+#' @export
 survey_duration <- function(x){
   paste0(gsub("\\..*", "", x %% 60),":", gsub(".*\\.", "", round(x %% 60, 2)))
 }
 
-# filter table of contents based on block
+
+#' Filter table of contents by block
+#'
+#' @param tbl Survey
+#' @param blck Survey block
+#'
+#' @return Filtered toc
+#' @keywords internal
+#' @export
 toc_filter <- function(tbl, blck) {
   if (any(tbl$block == blck)) {
     tmp <- tbl |>
@@ -64,7 +119,15 @@ toc_filter <- function(tbl, blck) {
   }
 }
 
-# build the filter options that are seen in the dropdown
+
+#' Build filter options seen in app dropdown
+#'
+#' @param toc TOC
+#' @param blockfilter Filter
+#'
+#' @return updated TOC
+#' @keywords internal
+#' @export
 pull_filter_toc <- function(toc, blockfilter) {
   if (blockfilter == "ALL BLOCKS") {
     tmpdat <- toc |>
@@ -89,6 +152,14 @@ pull_filter_toc <- function(toc, blockfilter) {
   out
 }
 
+#' Filtered choices available to user in app
+#'
+#' @param tbl Survey data
+#' @param var Labels of specific variable
+#'
+#' @return named vector
+#' @keywords internal
+#' @export
 filter_choices <- function(tbl, var) {
     attr(tbl[[var]], 'labels')
 }
