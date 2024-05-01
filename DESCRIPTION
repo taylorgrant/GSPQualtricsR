@@ -1,6 +1,6 @@
 Package: GSPQualtricsR
 Title: Interact with Qualtrics API and helper functions for analysis
-Version: 0.0.0.9000
+Version: 1.0
 Authors@R: person("Taylor", "Grant", , "taylorgrant38@gmail.com", role = c("aut", "cre"),
            comment = c(ORCID = "YOUR-ORCID-ID"))
 Description: Functions to fetch survey data from Qualtrics API and analyze the data. Pulls survey data in SPSS format. 
