@@ -48,7 +48,7 @@ user_generated <- function(tbl, toc) {
   qid <- paste0("QIDx", sample(1000:9999, length(vars)))
   v1 <- data.frame(block = "User Generated", question_order = qo, export_name = vars,
                    question_id = qid, question_type = "User Generated",
-                   question_text = vars, sub = NA, selector_type = NA)
+                   question_text = vars, sub = "", selector_type = "")
 }
 
 
