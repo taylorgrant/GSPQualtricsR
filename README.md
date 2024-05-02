@@ -7,9 +7,10 @@
 <!-- badges: end -->
 
 GSPQualtricsR provides an interface to download and work through
-Qualtrics surveys. It was written for primary usage through this Shiny
-app, however it can be used in R directly. Code to process the survey in
-R (wihthout using the app) is below.
+Qualtrics surveys. It was written for primary usage through this [Shiny
+app](https://github.com/taylorgrant/qualtricsApp), however it can be
+used in R directly. Code to process the survey in R (wihthout using the
+app) is below.
 
 ## Installation
 
