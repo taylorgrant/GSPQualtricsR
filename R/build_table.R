@@ -28,7 +28,7 @@ build_table <- function(tbl, ci) {
   sig_let <- paste0("(",paste(LETTERS[1:length(unique(tbl$var_helper))], collapse = ", "), "): ")
 
   # add line breaks after N spaces
-  strfun <- function(str, n) {gsub(paste0("([^ ]+( +[^ ]+){",n-1,"}) +"), "\\1<br>", str)}
+  strfun <- function(str, n) {gsub(paste0("([^ ]+( +[^ ]+){",n-1,"}) +"), "\\1<br> ", str)}
 
 
   # SINGLE VARIABLE; NO CROSSTAB --------------------------------------------
